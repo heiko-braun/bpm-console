@@ -40,9 +40,9 @@
         <commons-lang.version>2.4</commons-lang.version>
         <commons-config.version>1.6</commons-config.version>
         <gson.version>1.2.2</gson.version>
-        <gwt.version>2.0.3</gwt.version>
+        <gwt.version>2.0.4</gwt.version>
 
-        <gwt.maven>1.2</gwt.maven>       
+        <gwt.maven>1.3-12393</gwt.maven>       
         <jaf.version>1.1</jaf.version>
         <javax.ejb.version>3.0</javax.ejb.version>
         <javax.jaxb.version>2.1</javax.jaxb.version>
@@ -54,8 +54,8 @@
         <stax-api.version>1.0-2</stax-api.version>
         <report.server.version>1.3.0</report.server.version>
 
-        <errai.version>1.1-M2</errai.version>
-        <mvel.version>2.0.18</mvel.version>
+        <errai.version>1.1-SNAPSHOT</errai.version>
+        <mvel.version>2.0.18-RC4</mvel.version>
         <guice.version>2.0</guice.version>
         <slf4j.version>1.5.2</slf4j.version>
     </properties>
