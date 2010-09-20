@@ -1,0 +1,459 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <name>JBoss BPM - Console</name>
+    <groupId>org.jboss.bpm</groupId>
+    <artifactId>gwt-console-parent</artifactId>
+    <version>2.1.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <scm>
+        <connection>scm:svn:https://svn.jboss.org/repos/soag/bpm-console/trunk</connection>
+        <developerConnection>scm:svn:https://svn.jboss.org/repos/soag/bpm-console/trunk</developerConnection>
+        <url>https://svn.jboss.org/repos/soag/bpm-console/trunk</url>
+    </scm>
+
+    <organization>
+        <name>JBoss, a division of Red Hat</name>
+        <url>http://www.jboss.org</url>
+    </organization>
+
+    <!-- IssueManagement -->
+    <issueManagement>
+        <system>jira</system>
+        <url>http://jira.jboss.org/jira/browse/BPMC</url>
+    </issueManagement>
+
+    <!-- licenses -->
+    <licenses>
+        <license>
+            <name>lgpl</name>
+            <url>http://repository.jboss.com/licenses/lgpl.txt</url>
+        </license>
+    </licenses>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <commons.fileupload.version>1.2.1</commons.fileupload.version>
+        <commons.io.version>1.3.2</commons.io.version>
+        <commons.logging.version>1.1.1</commons.logging.version>
+        <commons-lang.version>2.4</commons-lang.version>
+        <commons-config.version>1.6</commons-config.version>
+        <gson.version>1.2.2</gson.version>
+        <gwt.version>2.0.3</gwt.version>
+
+        <gwt.maven>1.2</gwt.maven>       
+        <jaf.version>1.1</jaf.version>
+        <javax.ejb.version>3.0</javax.ejb.version>
+        <javax.jaxb.version>2.1</javax.jaxb.version>
+        <jboss.common.version>2.2.7.GA</jboss.common.version>
+        <junit.version>3.8.1</junit.version>
+        <mvc4g.version>1.0.0-jboss</mvc4g.version>
+        <!--mosaic.version>0.4.0-rc4</mosaic.version-->
+        <resteasy.version>1.0.2.GA</resteasy.version>
+        <stax-api.version>1.0-2</stax-api.version>
+        <report.server.version>1.3.0</report.server.version>
+
+        <errai.version>1.1-M2</errai.version>
+        <mvel.version>2.0.18</mvel.version>
+        <guice.version>2.0</guice.version>
+        <slf4j.version>1.5.2</slf4j.version>
+    </properties>
+
+    <modules>        
+        <module>server</module>
+        <module>gui</module>
+        <module>shared</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-configuration</groupId>
+                <artifactId>commons-configuration</artifactId>
+                <version>${commons-config.version}</version>
+            </dependency>
+
+            <!-- GWT related -->
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-servlet</artifactId>
+                <version>${gwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-user</artifactId>
+                <version>${gwt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gchart</artifactId>
+                <version>${gchart.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>         
+            <dependency>
+                <groupId>com.googlecode.mvc4g</groupId>
+                <artifactId>mvc4g</artifactId>
+                <version>${mvc4g.version}</version>
+            </dependency>
+
+
+            <!-- Mosaic -->
+            <!--dependency>
+                <groupId>com.googlecode.gwtmosaic</groupId>
+                <artifactId>gwt-mosaic</artifactId>
+                <version>${mosaic.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.googlecode.gwtmosaic</groupId>
+                <artifactId>gwt-beans-binding</artifactId>
+                <version>${mosaic.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.googlecode.gwtmosaic</groupId>
+                <artifactId>gwt-dnd</artifactId>
+                <version>${mosaic.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.googlecode.gwtmosaic</groupId>
+                <artifactId>gwtx</artifactId>
+                <version>${mosaic.version}</version>
+            </dependency-->
+
+            <!-- Other -->
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons.logging.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.xml.stream</groupId>
+                <artifactId>stax-api</artifactId>
+                <version>${stax-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.activation</groupId>
+                <artifactId>activation</artifactId>
+                <version>${jaf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${javax.jaxb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>${javax.jaxb.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.ejb</groupId>
+                <artifactId>ejb-api</artifactId>
+                <version>${javax.ejb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss</groupId>
+                <artifactId>jboss-common-core</artifactId>
+                <version>${jboss.common.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jaxrs</artifactId>
+                <version>${resteasy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-multipart-provider</artifactId>
+                <version>${resteasy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>${commons.fileupload.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons.io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.bpm</groupId>
+                <artifactId>report-core</artifactId>
+                <version>${report.server.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.bpm</groupId>
+                <artifactId>report-shared</artifactId>
+                <classifier>sources</classifier>
+                <version>${report.server.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.bpm</groupId>
+                <artifactId>report-shared</artifactId>
+                <version>${report.server.version}</version>
+            </dependency>
+
+            <!-- Errai -->
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-workspaces</artifactId>
+                <version>${errai.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-workspaces</artifactId>
+                <version>${errai.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-common</artifactId>
+                <version>${errai.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-common</artifactId>
+                <version>${errai.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-bus</artifactId>
+                <version>${errai.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-tools</artifactId>
+                <version>${errai.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-bus</artifactId>
+                <version>${errai.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+           
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.4</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1-beta-1</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                    <failIfNoTests>false</failIfNoTests>
+                    <trimStackTrace>false</trimStackTrace>
+                    <systemProperties>
+                        <property>
+                            <name>log4j.output.dir</name>
+                            <value>${project.build.directory}</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                    <showDeprecation>false</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <optimize>true</optimize>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.0-beta-7</version>
+                <configuration>
+                    <tagBase>http://svn.jboss.org/repos/soag/bpm-console/tags</tagBase>
+                </configuration>
+            </plugin>
+
+        </plugins>
+
+        <!-- PluginManagement -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.sun.tools.jxc.maven2</groupId>
+                    <artifactId>maven-jaxb-schemagen-plugin</artifactId>
+                    <version>1.2</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.sun.xml.bind</groupId>
+                            <artifactId>jaxb-impl</artifactId>
+                            <version>2.1.7</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.sun.xml.bind</groupId>
+                            <artifactId>jaxb-xjc</artifactId>
+                            <version>2.1.7</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.0.2.SP1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>net.sourceforge.maven-taglib</groupId>
+                    <artifactId>maven-taglib-plugin</artifactId>
+                    <version>2.3</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+    </build>
+
+    <!-- Reporting -->
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <!-- Profiles -->
+    <profiles>
+
+        <profile>
+            <id>enableTests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>false</skipTests>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+
+
+    <!-- Repositories -->
+<!-- Repositories -->
+    <repositories>
+        <repository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Maven Repository Group</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Maven Repository Group</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <!-- DistributionManagement -->
+    <distributionManagement>
+        <repository>
+            <id>jboss-releases-repository</id>
+            <name>JBoss Releases Repository</name>
+            <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>jboss-snapshots-repository</id>
+            <name>JBoss Snapshots Repository</name>
+            <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+
+    </distributionManagement>
+
+</project>
