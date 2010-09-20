@@ -4,13 +4,13 @@
     <name>JBoss BPM - Console</name>
     <groupId>org.jboss.bpm</groupId>
     <artifactId>gwt-console-parent</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>2.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <scm>
-        <connection>scm:svn:https://svn.jboss.org/repos/soag/bpm-console/trunk</connection>
-        <developerConnection>scm:svn:https://svn.jboss.org/repos/soag/bpm-console/trunk</developerConnection>
-        <url>https://svn.jboss.org/repos/soag/bpm-console/trunk</url>
+        <connection>scm:git:git@github.com:heiko-braun/bpm-console.git</connection>
+        <developerConnection>scm:git:git@github.com:heiko-braun/bpm-console.git</developerConnection>
+        <url>http://github.com/heiko-braun/bpm-console</url>
     </scm>
 
     <organization>
@@ -60,10 +60,10 @@
         <slf4j.version>1.5.2</slf4j.version>
     </properties>
 
-    <modules>        
+    <modules>
+        <module>shared</module>
         <module>server</module>
         <module>gui</module>
-        <module>shared</module>
     </modules>
 
     <dependencyManagement>
