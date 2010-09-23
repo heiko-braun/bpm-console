@@ -64,7 +64,7 @@ public class PluginMgr
     }
     else
     {
-      log.warn("Unable to load plugin: '" + type.getName() + "'");
+      //log.warn("Unable to load plugin: '" + type.getName() + "'");
       failedToResolve.add(type.getName());
       return null;
     }
