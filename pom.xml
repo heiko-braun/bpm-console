@@ -258,6 +258,19 @@
                 <classifier>sources</classifier>
             </dependency>
 
+            <dependency>
+                <groupId>org.jboss.bpm</groupId>
+                <artifactId>activity-monitor-ui-lib</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.bpm</groupId>
+                <artifactId>activity-monitor-ui-lib</artifactId>
+                <classifier>sources</classifier>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

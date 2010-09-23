@@ -66,6 +66,28 @@
 
         <dependency>
             <groupId>org.jboss.bpm</groupId>
+            <artifactId>activity-monitor-ui-lib</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.bpm</groupId>
+            <artifactId>activity-monitor-ui-lib</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.jboss.bpm</groupId>
             <artifactId>gwt-console-rpc</artifactId>
             <classifier>sources</classifier>
             <version>${version}</version>
@@ -246,10 +268,10 @@
                     <logLevel>INFO</logLevel>
                     <runTarget>app.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
-                    <extraJvmArgs>-Xmx512m</extraJvmArgs>
+                    <extraJvmArgs>-Xmx320m</extraJvmArgs>
                     <localWorkers>2</localWorkers>
                     <soyc>false</soyc>
-                    <style>OBF</style>
+                    <style>DETAILED</style>
                 </configuration>
                 <executions>
                     <execution>
