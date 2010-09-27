@@ -48,7 +48,7 @@
             <artifactId>errai-tools</artifactId>
             <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-widgets</artifactId>
@@ -76,6 +76,14 @@
                     <groupId>org.hibernate</groupId>
                     <artifactId>hibernate-annotations</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-entitymanager</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-tools</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -90,6 +98,24 @@
             <artifactId>activity-monitor-model</artifactId>
             <scope>provided</scope>
             <version>1.0.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-entitymanager</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-tools</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -277,7 +303,7 @@
                     <extraJvmArgs>-Xmx320m</extraJvmArgs>
                     <localWorkers>2</localWorkers>
                     <soyc>false</soyc>
-                    <style>DETAILED</style>
+                    <style>OBF</style>
                 </configuration>
                 <executions>
                     <execution>
@@ -329,7 +355,7 @@
                                 <delete dir="war/WEB-INF/classes"/>
                                 <delete dir="war/WEB-INF/lib"/>
                                 <delete file="war/WEB-INF/jboss-web.xml"/>
-                                <delete file="war/WEB-INF/web.xml"/>                                
+                                <delete file="war/WEB-INF/web.xml"/>
                                 <delete dir="war/app"/>
                                 <delete dir="target"/>
 
@@ -366,17 +392,17 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>                                
+                            <tasks>
                                 <filter token="comment.left" value="" />
                                 <filter token="comment.right" value="" />
                                 <filter token="console.app.webcontext" value="${console.app.webcontext}" />
                                 <copy file="src/main/templates/WEB-INF/web.xml"
                                       todir="war/WEB-INF"
-                                        filtering="true" overwrite="true"/>
+                                      filtering="true" overwrite="true"/>
 
-                                 <copy file="src/main/templates/errai-proxy.json"
+                                <copy file="src/main/templates/errai-proxy.json"
                                       todir="war/WEB-INF/classes"
-                                        filtering="true" overwrite="true"/>
+                                      filtering="true" overwrite="true"/>
                             </tasks>
                             <sourceRoot>
                                 ${project.build.directory}/generated-sources
@@ -396,7 +422,7 @@
                                 <filter token="comment.right" value="${comment.right}" />
                                 <copy file="src/main/templates/WEB-INF/web.xml"
                                       todir="war/WEB-INF"
-                                        filtering="true" overwrite="true"/>
+                                      filtering="true" overwrite="true"/>
                             </tasks>
                             <sourceRoot>
                                 ${project.build.directory}/generated-sources
@@ -444,6 +470,24 @@
             </build>
         </profile>
 
+        <profile>
+            <id>jboss</id>
+            <dependencies>
+                <dependency>
+                    <groupId>dom4j</groupId>
+                    <artifactId>dom4j</artifactId>
+                    <scope>provided</scope>
+                    <version>1.6</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>javassist</groupId>
+                    <artifactId>javassist</artifactId>
+                    <scope>provided</scope>
+                    <version>3.12.1.GA</version>
+                </dependency>
+            </dependencies>
+        </profile>
         <!--
          =======================================================
           jBPM Profile (default)
