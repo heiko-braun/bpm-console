@@ -40,10 +40,10 @@ import org.timepedia.chronoscope.client.XYPlot;
 import org.timepedia.chronoscope.client.browser.ChartPanel;
 import org.timepedia.chronoscope.client.browser.Chronoscope;
 import org.timepedia.chronoscope.client.browser.json.GwtJsonDataset;
-import org.timepedia.chronoscope.client.browser.json.JsonDatasetJSO;
 import org.timepedia.chronoscope.client.canvas.View;
 import org.timepedia.chronoscope.client.canvas.ViewReadyCallback;
 import org.timepedia.chronoscope.client.data.tuple.Tuple2D;
+import org.timepedia.chronoscope.client.render.BarChartXYRenderer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -109,14 +109,17 @@ public class ExecutionHistoryView implements WidgetProvider
 
         // ------------
 
-        BoxLayout boxLayout = new BoxLayout(BoxLayout.Orientation.HORIZONTAL);
+        BoxLayout boxLayout = new BoxLayout(BoxLayout.Orientation.HORIZONTAL);        
         timespanPanel = new LayoutPanel(boxLayout);
+        timespanPanel.setPadding(0);        
 
         timespan = new HTML();
-        timespan.getElement().setAttribute("style", "padding-top:2px; color:#C8C8C8;font-size:16px;text-align:left;");
+        timespan.getElement().setAttribute("style", "padding-left:10px;padding-top:2px; color:#C8C8C8;font-size:16px;text-align:left;");
         timespanButton = new ToolButton();
-        timespanButton.setVisible(false);
+
         timespanButton.setStyle(ToolButton.ToolButtonStyle.MENU);
+        timespanButton.getElement().setAttribute("style", "padding-right:0px;background-image:none;");
+        timespanButton.setVisible(false);
 
         final PopupMenu timeBtnMenu = new PopupMenu();
 
@@ -133,7 +136,7 @@ public class ExecutionHistoryView implements WidgetProvider
 
         timespanButton.setMenu(timeBtnMenu);
 
-        timespanPanel.add(timespanButton);
+        timespanPanel.add(timespanButton, new BoxLayoutData("20px", "20px"));        
         timespanPanel.add(timespan, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
 
         // ------------
@@ -273,12 +276,16 @@ public class ExecutionHistoryView implements WidgetProvider
             // if exists remove. I don't know how to update at this point
             if(chartPanel!=null)
             {
-                chartArea.remove(chartPanel);
+                //chartArea.remove(chartPanel);
+                chartPanel.replaceDatasets(dsArray);
                 overlayMapping.clear();
             }
+            else
+            {
+                initChartPanel(dsArray);
+            }
 
-            initChartPanel(dsArray);
-
+            timespan.setText(dsArray[0].getRangeLabel());            
             chartArea.layout();
         }
         catch (Exception e)
@@ -293,7 +300,7 @@ public class ExecutionHistoryView implements WidgetProvider
 
         // ------
         chartPanel = Chronoscope.createTimeseriesChart(datasets, dim[0], dim[1]);
-
+        
         // marker
         final XYPlot plot = chartPanel.getChart().getPlot();
         
@@ -309,18 +316,14 @@ public class ExecutionHistoryView implements WidgetProvider
             }
         });*/
 
-        // ------
+        // ------        
 
-        timespan.setText(datasets[0].getRangeLabel());
-
-        chartPanel.setViewReadyCallback(
-                new ViewReadyCallback() {
-                    public void onViewReady(View view)
-                    {
-                        resizeChartArea(view);
-                    }
-                }
-        );
+        final ViewReadyCallback callback = new ViewReadyCallback() {
+            public void onViewReady(View view) {                
+                resizeChartArea(view);
+            }
+        };
+        chartPanel.setViewReadyCallback(callback);
 
         chartArea.add(chartPanel);
 
@@ -360,7 +363,7 @@ public class ExecutionHistoryView implements WidgetProvider
             view.resize(dim[0], dim[1]);
 
         resizeChartArea(view);
-
+        
         return view;
     }
 
