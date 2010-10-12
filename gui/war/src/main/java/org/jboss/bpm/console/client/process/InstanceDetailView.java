@@ -117,7 +117,7 @@ public class InstanceDetailView extends CaptionLayoutPanel implements ViewInterf
           }
         }
     );
-    diagramBtn.setVisible(!isRiftsawInstance);
+    //diagramBtn.setVisible(!isRiftsawInstance);
 
     diagramBtn.setEnabled(false);
     buttonPanel.add(diagramBtn);
