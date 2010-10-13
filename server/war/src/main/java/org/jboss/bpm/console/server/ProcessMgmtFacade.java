@@ -21,42 +21,27 @@
  */
 package org.jboss.bpm.console.server;
 
+import com.google.gson.Gson;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jboss.bpm.console.client.model.*;
+import org.jboss.bpm.console.server.gson.GsonFactory;
+import org.jboss.bpm.console.server.integration.ManagementFactory;
+import org.jboss.bpm.console.server.integration.ProcessManagement;
+import org.jboss.bpm.console.server.plugin.*;
+import org.jboss.bpm.console.server.util.Payload2XML;
+import org.jboss.bpm.console.server.util.RsComment;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jboss.bpm.console.client.model.ActiveNodeInfo;
-import org.jboss.bpm.console.client.model.ProcessDefinitionRef;
-import org.jboss.bpm.console.client.model.ProcessDefinitionRefWrapper;
-import org.jboss.bpm.console.client.model.ProcessInstanceRef;
-import org.jboss.bpm.console.client.model.ProcessInstanceRefWrapper;
-import org.jboss.bpm.console.server.gson.GsonFactory;
-import org.jboss.bpm.console.server.integration.ManagementFactory;
-import org.jboss.bpm.console.server.integration.ProcessManagement;
-import org.jboss.bpm.console.server.plugin.FormAuthorityRef;
-import org.jboss.bpm.console.server.plugin.FormDispatcherPlugin;
-import org.jboss.bpm.console.server.plugin.GraphViewerPlugin;
-import org.jboss.bpm.console.server.plugin.PluginMgr;
-import org.jboss.bpm.console.server.util.Payload2XML;
-import org.jboss.bpm.console.server.util.RsComment;
-
-import com.google.gson.Gson;
 
 /**
  * REST server module for accessing process related data.
@@ -73,6 +58,7 @@ public class ProcessMgmtFacade
 
   private ProcessManagement processManagement;
   private GraphViewerPlugin graphViewerPlugin;
+  private ProcessActivityPlugin activityPlugin;
 
   private FormDispatcherPlugin formPlugin;
 
@@ -112,6 +98,18 @@ public class ProcessMgmtFacade
     }
 
     return graphViewerPlugin;
+  }
+
+    private ProcessActivityPlugin getActivityPlugin()
+  {
+    if(activityPlugin==null)
+    {
+      activityPlugin = PluginMgr.load(
+          ProcessActivityPlugin.class
+      );
+    }
+
+    return activityPlugin;
   }
 
   @GET
@@ -331,6 +329,33 @@ public class ProcessMgmtFacade
 
     throw new RuntimeException(
         GraphViewerPlugin.class.getName()+ " not available."
+    );
+  }
+
+  @GET
+  @Path("definition/{id}/image/{instance}")
+  @Produces("image/*")
+  public Response getProcessInstanceImage(
+      @Context
+      HttpServletRequest request,
+      @PathParam("id")
+      String id,
+      @PathParam("instance")
+      String instance
+  )
+  {
+    ProcessActivityPlugin plugin = getActivityPlugin();
+    if(plugin !=null)
+    {
+      byte[] processImage = plugin.getProcessInstanceImage(id, instance);
+      if(processImage!=null)
+        return Response.ok(processImage).type("image/png").build();
+      else
+        return Response.status(404).build();
+    }
+
+    throw new RuntimeException(
+        ProcessActivityPlugin.class.getName()+ " not available."
     );
   }
 
