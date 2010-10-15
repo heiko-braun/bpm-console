@@ -57,6 +57,7 @@ import java.util.List;
 /**
  * @author Heiko.Braun <heiko.braun@jboss.com>
  */
+@Deprecated
 public class DefinitionListView implements WidgetProvider, ViewInterface, DataDriven
 {
   public final static String ID = DefinitionListView.class.getName();

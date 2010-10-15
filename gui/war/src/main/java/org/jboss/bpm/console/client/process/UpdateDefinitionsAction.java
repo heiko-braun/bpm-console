@@ -29,6 +29,7 @@ import org.jboss.bpm.console.client.common.AbstractRESTAction;
 import org.jboss.bpm.console.client.common.DataDriven;
 import org.jboss.bpm.console.client.model.JSOParser;
 import org.jboss.bpm.console.client.model.ProcessDefinitionRef;
+import org.jboss.bpm.console.client.process.v2.Explorer;
 import org.jboss.bpm.console.client.util.ConsoleLog;
 
 import java.util.List;
@@ -68,15 +69,16 @@ public class UpdateDefinitionsAction extends AbstractRESTAction
   {
     long start = System.currentTimeMillis();
 
-    DefinitionListView view = (DefinitionListView) controller.getView(DefinitionListView.ID);
+    Explorer view = (Explorer) controller.getView(Explorer.class.getName());
     if(view!=null) // may not be initialized (lazy)
-    {
-      //JSONValue json = JSONParser.parse(response.getText());
+    {      
       List<ProcessDefinitionRef> definitions =
           JSOParser.parseProcessDefinitions(response.getText());
       view.update(definitions);
       ConsoleLog.info("Loaded " + definitions.size() + " process definitions in " +(System.currentTimeMillis()-start)+" ms");
 
     }
+
+
   }
 }

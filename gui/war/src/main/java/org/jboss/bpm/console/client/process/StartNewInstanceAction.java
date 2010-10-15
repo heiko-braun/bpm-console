@@ -35,7 +35,7 @@ import org.jboss.bpm.console.client.model.ProcessDefinitionRef;
  *
  * @author Heiko.Braun <heiko.braun@jboss.com>
  */
-class StartNewInstanceAction extends AbstractRESTAction
+public class StartNewInstanceAction extends AbstractRESTAction
 {
   public final static String ID = StartNewInstanceAction.class.getName();
 

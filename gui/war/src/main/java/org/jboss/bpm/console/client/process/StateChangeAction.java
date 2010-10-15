@@ -36,7 +36,7 @@ import org.jboss.bpm.console.client.model.ProcessInstanceRef;
  *
  * @author Heiko.Braun <heiko.braun@jboss.com>
  */
-class StateChangeAction extends AbstractRESTAction
+public class StateChangeAction extends AbstractRESTAction
 {
   public final static String ID = StateChangeAction.class.getName();
 

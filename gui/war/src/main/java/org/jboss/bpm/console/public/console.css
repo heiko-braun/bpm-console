@@ -260,3 +260,11 @@ div.activeNode-header-link a:hover {
     margin:0px;
     padding:0px;
 }
+
+
+/*merge these with workspaces*/
+
+
+.gwt-menubar .gwt-menuitem-selected {
+    background: #7AA5D6;
+}

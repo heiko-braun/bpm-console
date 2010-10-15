@@ -28,7 +28,8 @@ import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
 
-@LoadTool(name = "Process Overview", group = "Processes", icon = "processIcon", priority = 1)
+//@LoadTool(name = "Process Overview", group = "Processes", icon = "processIcon", priority = 1)
+@Deprecated
 public class ProcessModule implements WidgetProvider
 {
   static MergedProcessView instance = null;

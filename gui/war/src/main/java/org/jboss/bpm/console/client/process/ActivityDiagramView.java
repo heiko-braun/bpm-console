@@ -36,64 +36,73 @@ import java.util.List;
  * @author Heiko.Braun <heiko.braun@jboss.com>
  */
 public class ActivityDiagramView extends ScrollLayoutPanel
-    implements ViewInterface
+        implements ViewInterface
 {
 
-  public final static String ID = ActivityDiagramView.class.getName();
-  
-  private ProcessDefinitionRef processRef;
+    public final static String ID = ActivityDiagramView.class.getName();
 
-  private ProcessInstanceRef instanceRef;
+    private ProcessDefinitionRef processRef;
 
-  private Controller controller;
+    private ProcessInstanceRef instanceRef;
 
-  public ActivityDiagramView()
-  {
-    super();
-  }
+    private Controller controller;
 
-
-  public void setController(Controller controller)
-  {
-    this.controller = controller;
-  }
-
-  public void update(ActivityDiagramResultEvent event)
-  {
-
-    List<ActiveNodeInfo> activeNodeInfos = event.getActiveNodeInfo();
-    String imageUrl = event.getImageUrl();
-
-    // remove contents
-    this.clear();
-
-    // add overlay
-    /*HTML html = new HTML(
-        "<div style='width:1024px; height:768px; background-color:#ffffff;'><div id=\"imageContainer\" style=\"position:relative;top:-1;left:-1;height:"+activeNodeInfo.getHeight()+"px;width:"+activeNodeInfo.getWidth()+"px\">" +
-            "<img src=\""+imageUrl+"\" style=\"position:absolute;top:0;left:0\" />" +
-            "" +
-            "<div class=\"activeNode\" style=\"top:"+ (activeNode.getY()) +"px;left:"+activeNode.getX()+"px;width:"+(activeNode.getWidth()-2)+"px;height:"+(activeNode.getHeight()-2)+"px\"></div>" +
-            "" +
-            "<div class=\"activeNode-header\" style=\"top:"+(activeNode.getY()-15)+"px;left:"+activeNode.getX()+"px;width:"+activeNode.getWidth()+"px;height:15px\">" +
-            " <div class=\"activeNode-header-link\"><a href=\"javascript:alert('Not implemented!')\">Running</a></div>" +
-            "</div>" +
-            "</div></div>"
-    );*/
-
-    String s = 
-        "<div style='width:1024px; height:768px; background-color:#ffffff;'>" +
-        	"<div id=\"imageContainer\" style=\"position:relative;top:-1;left:-1;\">" +
-        		"<img src=\""+imageUrl+"\" style=\"position:absolute;top:0;left:0\" />";
-    for (ActiveNodeInfo activeNodeInfo: activeNodeInfos) {
-      
-    	s+= 	"<div class=\"bpm-graphView-activityImage\" style=\"position:absolute;top:"+ (activeNodeInfo.getActiveNode().getY()-8) +"px;left:"+(activeNodeInfo.getActiveNode().getX()-8)+"px;width:50px;height:50px; z-index:1000;background-image: url(images/icons/play_red_big.png);background-repeat:no-repeat;\"></div>";
+    public ActivityDiagramView()
+    {
+        super();
     }
-    s+= 	"</div>" +
-    	"</div>";
 
-    HTML html = new HTML(s);
 
-    this.add(html);
-    invalidate();
-  } 
+    public void setController(Controller controller)
+    {
+        this.controller = controller;
+    }
+
+    public void update(ActivityDiagramResultEvent event)
+    {
+
+        List<ActiveNodeInfo> activeNodeInfos = event.getActiveNodeInfo();
+        String imageUrl = event.getImageUrl();
+
+        // remove contents
+        this.clear();
+
+        String s =
+                "<div style='width:1024px; height:768px; background-color:#ffffff;'>" +
+                        "<div id=\"imageContainer\" style=\"position:relative;top:-1;left:-1;\">" +
+                        "<img src=\""+imageUrl+"\" style=\"position:absolute;top:0;left:0\" />";
+        for (ActiveNodeInfo activeNodeInfo: activeNodeInfos) {
+
+            s+= 	"<div class=\"bpm-graphView-activityImage\" style=\"position:absolute;top:"+ (activeNodeInfo.getActiveNode().getY()-8) +"px;left:"+(activeNodeInfo.getActiveNode().getX()-8)+"px;width:50px;height:50px; z-index:1000;background-image: url(images/icons/play_red_big.png);background-repeat:no-repeat;\"></div>";
+        }
+        s+= 	"</div>" +
+                "</div>";
+
+        HTML html = new HTML(s);
+
+        this.add(html);
+        invalidate();
+    }
+
+    /**
+     * No overlay. Activity encoded in image
+     * @param imageUrl
+     */
+    public void update(String imageUrl)
+    {
+        // remove contents
+        this.clear();
+
+        String s =
+                "<div style='width:1024px; height:768px; background-color:#ffffff;'>" +
+                        "<div id=\"imageContainer\" style=\"position:relative;top:-1;left:-1;\">" +
+                        "<img src=\""+imageUrl+"\" style=\"position:absolute;top:0;left:0\" />";
+        s+= 	"</div>" +
+                "</div>";
+
+        HTML html = new HTML(s);
+
+        this.add(html);
+        invalidate();
+    }    
 }
