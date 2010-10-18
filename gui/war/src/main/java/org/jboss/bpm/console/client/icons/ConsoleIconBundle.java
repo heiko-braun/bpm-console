@@ -26,75 +26,91 @@ import com.google.gwt.resources.client.ImageResource;
 
 public interface ConsoleIconBundle extends ClientBundle
 {
-  @ClientBundle.Source("processIcon.png")
-  ImageResource processIcon();
+    @ClientBundle.Source("processIcon.png")
+    ImageResource processIcon();
 
-  @ClientBundle.Source("play.png")
-  ImageResource instanceIcon();
+    @ClientBundle.Source("play.png")
+    ImageResource instanceIcon();
 
-  @ClientBundle.Source("toolsIcon.png")
-  ImageResource settingsIcon();
+    @ClientBundle.Source("toolsIcon.png")
+    ImageResource settingsIcon();
 
-  @ClientBundle.Source("taskIcon.png")
-  ImageResource taskIcon();
+    @ClientBundle.Source("taskIcon.png")
+    ImageResource taskIcon();
 
-  @ClientBundle.Source("userIcon.png")
-  ImageResource userIcon();
+    @ClientBundle.Source("userIcon.png")
+    ImageResource userIcon();
 
-  @ClientBundle.Source("tool-button-collapse-down.png")
-  ImageResource collapseDownIcon();
+    @ClientBundle.Source("tool-button-collapse-down.png")
+    ImageResource collapseDownIcon();
 
-  @ClientBundle.Source("tool-button-collapse-left.png")
-  ImageResource collapseLeftIcon();
+    @ClientBundle.Source("tool-button-collapse-left.png")
+    ImageResource collapseLeftIcon();
 
-  @ClientBundle.Source("errorIcon.png")
-  ImageResource errorIcon();
+    @ClientBundle.Source("errorIcon.png")
+    ImageResource errorIcon();
 
-  @ClientBundle.Source("dialog-information.png")
-  ImageResource infoIcon();
+    @ClientBundle.Source("dialog-information.png")
+    ImageResource infoIcon();
 
-  @ClientBundle.Source("dialog-warning.png")
-  ImageResource warnIcon();
+    @ClientBundle.Source("dialog-warning.png")
+    ImageResource warnIcon();
 
-  @ClientBundle.Source("dialog-question.png")
-  ImageResource questionIcon();
+    @ClientBundle.Source("dialog-question.png")
+    ImageResource questionIcon();
 
-  @ClientBundle.Source("loading.gif")
-  ImageResource loadingIcon();
+    @ClientBundle.Source("loading.gif")
+    ImageResource loadingIcon();
 
-  @ClientBundle.Source("reload.png")
-  ImageResource reloadIcon();
+    @ClientBundle.Source("reload.png")
+    ImageResource reloadIcon();
 
-  @ClientBundle.Source("report.png")
-  ImageResource reportIcon();
+    @ClientBundle.Source("report.png")
+    ImageResource reportIcon();
 
-  @ClientBundle.Source("runtime.png")
-  ImageResource runtimeIcon();
+    @ClientBundle.Source("runtime.png")
+    ImageResource runtimeIcon();
 
-  @ClientBundle.Source("deployment.png")
-  ImageResource deploymentIcon();
+    @ClientBundle.Source("deployment.png")
+    ImageResource deploymentIcon();
 
-  @ClientBundle.Source("jobs.png")
-  ImageResource jobsIcon();
+    @ClientBundle.Source("jobs.png")
+    ImageResource jobsIcon();
 
-  @ClientBundle.Source("ws.png")
-  ImageResource webserviceIcon();
+    @ClientBundle.Source("ws.png")
+    ImageResource webserviceIcon();
 
-  @ClientBundle.Source("arrow_blue.png")
-  ImageResource arrowIcon();
+    @ClientBundle.Source("arrow_blue.png")
+    ImageResource arrowIcon();
 
-  @ClientBundle.Source("piece.png")
-  ImageResource pieceIcon();
+    @ClientBundle.Source("piece.png")
+    ImageResource pieceIcon();
 
-  @ClientBundle.Source("reportInstance.png")
-  ImageResource reportInstanceIcon();
+    @ClientBundle.Source("reportInstance.png")
+    ImageResource reportInstanceIcon();
 
-  @ClientBundle.Source("docIcon.png")
-  ImageResource docIcon();
+    @ClientBundle.Source("docIcon.png")
+    ImageResource docIcon();
 
-  @ClientBundle.Source("filter.png")
-  ImageResource filterIcon();
+    @ClientBundle.Source("filter.png")
+    ImageResource filterIcon();
 
-  @ClientBundle.Source("database.gif")
-  ImageResource databaseIcon();
+    @ClientBundle.Source("database.gif")
+    ImageResource databaseIcon();
+
+
+    @ClientBundle.Source("red.png")
+    ImageResource redIcon();
+
+    @ClientBundle.Source("green.png")
+    ImageResource greenIcon();
+
+    @ClientBundle.Source("blue.png")
+    ImageResource blueIcon();
+
+    @ClientBundle.Source("yellow.png")
+    ImageResource yellowIcon();
+
+    @ClientBundle.Source("grey.png")
+    ImageResource greyIcon();
 }

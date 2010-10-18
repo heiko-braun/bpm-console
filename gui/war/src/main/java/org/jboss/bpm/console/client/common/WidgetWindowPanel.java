@@ -35,42 +35,42 @@ import org.jboss.bpm.console.client.util.WindowUtil;
  */
 public class WidgetWindowPanel
 {
-  private WindowPanel window;
+    private WindowPanel window;
 
-  public WidgetWindowPanel(String title, final Widget widget)
-  {
-    this(title, widget, false);
-  }
-
-  public WidgetWindowPanel(String title, final Widget widget, boolean overlay)
-  {
-    window = new WindowPanel(title);
-    window.setAnimationEnabled(true);
-    window.setWidget(widget);
-
-    WindowUtil.addMaximizeButton(window, Caption.CaptionRegion.RIGHT);
-    WindowUtil.addMinimizeButton(window, Caption.CaptionRegion.RIGHT);
-
-    window.pack();
-
-    if(overlay)
+    public WidgetWindowPanel(String title, final Widget widget)
     {
-      final int width = Window.getClientWidth()-120;
-      final int height = Window.getClientHeight()-80;
-
-      window.setContentSize(new Dimension(width, height));
-      window.setPopupPosition(60,40);
-
-      window.show();
+        this(title, widget, false);
     }
-    else
+
+    public WidgetWindowPanel(String title, final Widget widget, boolean overlay)
     {
-      window.center();
-    }
-  }
+        window = new WindowPanel(title);
+        window.setAnimationEnabled(true);
+        window.setWidget(widget);
+        
+        WindowUtil.addMaximizeButton(window, Caption.CaptionRegion.RIGHT);
+        WindowUtil.addMinimizeButton(window, Caption.CaptionRegion.RIGHT);
 
-  public void close()
-  {
-    window.hide();
-  }
+        window.pack();
+
+        if(overlay)
+        {
+            final int width = Window.getClientWidth()-120;
+            final int height = Window.getClientHeight()-80;
+
+            window.setContentSize(new Dimension(width, height));
+            window.setPopupPosition(60,40);
+
+            window.show();
+        }
+        else
+        {
+            window.center();
+        }
+    }
+
+    public void close()
+    {
+        window.hide();
+    }
 }

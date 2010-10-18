@@ -130,7 +130,7 @@ public class InstanceDetailView extends CaptionLayoutPanel implements ViewInterf
         //diagramBtn.setVisible(!isRiftsawInstance);
 
         diagramBtn.setEnabled(false);
-        buttonPanel.add(diagramBtn);
+        buttonPanel.add(diagramBtn, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
 
         instanceDataBtn = new Button("Instance Data",
                 new ClickHandler()
@@ -148,7 +148,7 @@ public class InstanceDetailView extends CaptionLayoutPanel implements ViewInterf
                 }
         );
         instanceDataBtn.setEnabled(false);
-        buttonPanel.add(instanceDataBtn);
+        buttonPanel.add(instanceDataBtn, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
         this.add(buttonPanel);
 
         // plugin availability

@@ -15,6 +15,7 @@
  */
 package org.jboss.bpm.console.client.process.v2;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
@@ -32,10 +33,19 @@ import org.jboss.bpm.console.client.common.DataDriven;
 import org.jboss.bpm.console.client.common.LoadingOverlay;
 import org.jboss.bpm.console.client.model.ProcessDefinitionRef;
 import org.jboss.bpm.console.client.process.*;
+import org.jboss.bpm.console.client.util.ConsoleLog;
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
+import org.jboss.errai.workspaces.client.framework.Preferences;
 import org.jboss.errai.workspaces.client.framework.Registry;
+import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
+import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 
 import java.util.List;
 
@@ -91,7 +101,7 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
                         new Event(UpdateDefinitionsAction.ID, null)
                 );
             }
-        };
+        };         
 
         // -----------------------
 
@@ -110,7 +120,7 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
 
         LayoutPanel actionPanel = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.VERTICAL));
         actionPanel.getElement().setAttribute("style", "margin-right:10px;");
-        ToolButton actions = new ToolButton("Action");
+        ToolButton actions = new ToolButton("More ...");
         actions.setStyle(ToolButton.ToolButtonStyle.MENU);
         final Command blank = new Command() {
             public void execute()
@@ -121,9 +131,30 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
         // -----------------------
 
         PopupMenu actionMenu = new PopupMenu();
-        actionMenu.addItem("Properties", blank);
         actionMenu.addItem("Process Diagram", blank);
-        actionMenu.addItem("Execution History", blank);
+        actionMenu.addItem("Execution History", new Command()
+        {
+            public void execute() {
+
+                // open the tool
+                MessageBuilder.createMessage()
+                        .toSubject(Workspace.SUBJECT)
+                        .command(LayoutCommands.ActivateTool)
+                        .with(LayoutParts.TOOL, "Execution_History.1")
+                        .with(LayoutParts.TOOLSET, "ToolSet_Processes")
+                        .noErrorHandling()
+                        .sendNowWith(ErraiBus.get());
+
+                // load process data
+                ProcessDefinitionRef ref = getActiveDefinition();
+                MessageBuilder.createMessage()
+                        .toSubject("process.execution.history")
+                        .signalling()
+                        .with("processName", ref.getName()+"-"+ref.getVersion()) // hacky
+                        .noErrorHandling().sendNowWith(ErraiBus.get());
+
+            }
+        });
         actions.setMenu(actionMenu);
 
         actions.getElement().setAttribute("style", "widht:30px; height:12px; padding-right:0px;background-image:none;");
@@ -140,7 +171,7 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
         instanceView.provideWidget(new ProvisioningCallback()
         {
             public void onSuccess(Widget instance) {
-                tabPanel.add(instance, "Active Instances");
+                tabPanel.add(instance, "Running");
             }
 
             public void onUnavailable() {
@@ -179,7 +210,7 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
 
     private void selectDefinition()
     {
-        final LayoutPopupPanel popup = new LayoutPopupPanel(false);
+        final LayoutPopupPanel popup = new LayoutPopupPanel(true);
         popup.addStyleName("soa-PopupPanel");
 
         final ListBox listBox = new ListBox();
@@ -233,7 +264,7 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
                     sb.append("</div>");
 
                     title.setHTML(nameAndSubtitle+sb.toString());
-
+                                        
                     DeferredCommand.addCommand(new Command()
                     {
                         public void execute() {

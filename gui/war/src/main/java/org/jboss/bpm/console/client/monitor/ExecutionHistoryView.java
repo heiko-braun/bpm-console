@@ -26,13 +26,20 @@ import org.gwt.mosaic.ui.client.*;
 import org.gwt.mosaic.ui.client.layout.*;
 import org.gwt.mosaic.ui.client.util.ResizableWidget;
 import org.gwt.mosaic.ui.client.util.ResizableWidgetCollection;
+import org.jboss.bpm.console.client.common.LoadingOverlay;
 import org.jboss.bpm.console.client.util.ConsoleLog;
 import org.jboss.bpm.monitor.gui.client.*;
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
+import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
+import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.timepedia.chronoscope.client.Dataset;
 import org.timepedia.chronoscope.client.Datasets;
 import org.timepedia.chronoscope.client.Overlay;
@@ -43,7 +50,6 @@ import org.timepedia.chronoscope.client.browser.json.GwtJsonDataset;
 import org.timepedia.chronoscope.client.canvas.View;
 import org.timepedia.chronoscope.client.canvas.ViewReadyCallback;
 import org.timepedia.chronoscope.client.data.tuple.Tuple2D;
-import org.timepedia.chronoscope.client.render.BarChartXYRenderer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -81,7 +87,7 @@ public class ExecutionHistoryView implements WidgetProvider
         panel.add(toolBar, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
 
         // -----
-
+        
         menuButton = new ToolButton("Open");
         menuButton.setStyle(ToolButton.ToolButtonStyle.MENU);
         final Command selectProcessCmd = new Command() {
@@ -109,9 +115,9 @@ public class ExecutionHistoryView implements WidgetProvider
 
         // ------------
 
-        BoxLayout boxLayout = new BoxLayout(BoxLayout.Orientation.HORIZONTAL);        
+        BoxLayout boxLayout = new BoxLayout(BoxLayout.Orientation.HORIZONTAL);
         timespanPanel = new LayoutPanel(boxLayout);
-        timespanPanel.setPadding(0);        
+        timespanPanel.setPadding(0);
 
         timespan = new HTML();
         timespan.getElement().setAttribute("style", "padding-left:10px;padding-top:2px; color:#C8C8C8;font-size:16px;text-align:left;");
@@ -136,7 +142,7 @@ public class ExecutionHistoryView implements WidgetProvider
 
         timespanButton.setMenu(timeBtnMenu);
 
-        timespanPanel.add(timespanButton, new BoxLayoutData("20px", "20px"));        
+        timespanPanel.add(timespanButton, new BoxLayoutData("20px", "20px"));
         timespanPanel.add(timespan, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
 
         // ------------
@@ -144,8 +150,8 @@ public class ExecutionHistoryView implements WidgetProvider
         final LayoutPanel contents = new LayoutPanel(new RowLayout());
 
         LayoutPanel headerPanel = new LayoutPanel(new ColumnLayout());
-        headerPanel.add(title, new ColumnLayoutData("50%"));
-        headerPanel.add(timespanPanel, new ColumnLayoutData("50%"));
+        headerPanel.add(title, new ColumnLayoutData("60%"));
+        headerPanel.add(timespanPanel, new ColumnLayoutData("40%"));
 
         // ------------
 
@@ -156,6 +162,17 @@ public class ExecutionHistoryView implements WidgetProvider
 
         // ------------
         panel.add(contents, new BoxLayoutData(BoxLayoutData.FillStyle.BOTH));
+
+        ErraiBus.get().subscribe("process.execution.history", new MessageCallback()
+        {
+            public void callback(Message message) {
+                
+                String processName = message.get(String.class, "processName");
+                update(processName);
+
+            }
+        });
+
         callback.onSuccess(panel);
     }
 
@@ -168,7 +185,7 @@ public class ExecutionHistoryView implements WidgetProvider
 
                     public void callback(List<String> response)
                     {
-                        final LayoutPopupPanel popup = new LayoutPopupPanel(false);
+                        final LayoutPopupPanel popup = new LayoutPopupPanel(true);
                         popup.addStyleName("soa-PopupPanel");
 
                         final ListBox listBox = new ListBox();
@@ -193,20 +210,7 @@ public class ExecutionHistoryView implements WidgetProvider
                                 if(listBox.getSelectedIndex()>0)
                                 {
                                     popup.hide();
-                                    currentProcDef = listBox.getItemText(listBox.getSelectedIndex());
-
-                                    String name = currentProcDef; // riftsaw name juggling
-                                    String subtitle = "";
-                                    if(currentProcDef.indexOf("}")!=-1)
-                                    {
-
-                                        String[] qname = currentProcDef.split("}");
-                                        name = qname[1];
-                                        subtitle = qname[0].substring(1, qname[0].length());
-                                    }
-
-                                    title.setHTML(name + "<br/><div style='color:#C8C8C8;font-size:12px;text-align:left;'>"+subtitle+"</div>");
-                                    loadGraphData(currentProcDef, TimespanValues.LAST_7_DAYS);
+                                    update(listBox.getItemText(listBox.getSelectedIndex()));
                                 }
                             }
                         }));
@@ -239,6 +243,23 @@ public class ExecutionHistoryView implements WidgetProvider
 
     }
 
+    private void update(String procDef) {
+        currentProcDef = procDef;
+
+        String name = currentProcDef; // riftsaw name juggling
+        String subtitle = "";
+        if(currentProcDef.indexOf("}")!=-1)
+        {
+
+            String[] qname = currentProcDef.split("}");
+            name = qname[1];
+            subtitle = qname[0].substring(1, qname[0].length());
+        }
+
+        title.setHTML(name + "<br/><div style='color:#C8C8C8;font-size:12px;text-align:left;'>"+subtitle+"</div>");
+        loadGraphData(currentProcDef, TimespanValues.LAST_7_DAYS);
+    }
+
     /**
      * Loads the chronoscope data for a particlar processdefinition
      * @param procDefID
@@ -251,6 +272,7 @@ public class ExecutionHistoryView implements WidgetProvider
                 {
                     public void callback(String response)
                     {
+                        LoadingOverlay.on(chartArea, false);
                         timespanButton.setVisible(true);
                         renderChart(response);
                         timespanPanel.layout();
@@ -259,6 +281,7 @@ public class ExecutionHistoryView implements WidgetProvider
                 ChartData.class
         );
 
+        LoadingOverlay.on(chartArea, true);
         rpcService.getDefinitionActivity(procDefID, timespan);
     }
 
@@ -270,7 +293,7 @@ public class ExecutionHistoryView implements WidgetProvider
             datasets.add(MonitorUI.chronoscope.getDatasetReader().createDatasetFromJson(
                     new GwtJsonDataset(JSOModel.fromJson(jsonData)))
             );
-            
+
             Dataset[] dsArray = datasets.toArray();
 
             // if exists remove. I don't know how to update at this point
@@ -285,7 +308,7 @@ public class ExecutionHistoryView implements WidgetProvider
                 initChartPanel(dsArray);
             }
 
-            timespan.setText(dsArray[0].getRangeLabel());            
+            timespan.setText(dsArray[0].getRangeLabel());
             chartArea.layout();
         }
         catch (Exception e)
@@ -300,10 +323,10 @@ public class ExecutionHistoryView implements WidgetProvider
 
         // ------
         chartPanel = Chronoscope.createTimeseriesChart(datasets, dim[0], dim[1]);
-        
+
         // marker
         final XYPlot plot = chartPanel.getChart().getPlot();
-        
+
         /*plot.addPlotFocusHandler(new PlotFocusHandler(){
             public void onFocus(final PlotFocusEvent event)
             {
@@ -319,7 +342,7 @@ public class ExecutionHistoryView implements WidgetProvider
         // ------        
 
         final ViewReadyCallback callback = new ViewReadyCallback() {
-            public void onViewReady(View view) {                
+            public void onViewReady(View view) {
                 resizeChartArea(view);
             }
         };
@@ -352,7 +375,7 @@ public class ExecutionHistoryView implements WidgetProvider
 
         return new int[] {w, h};
     }
-    
+
     private View resizeChartView()
     {
         int[] dim = calcChartDimension();
@@ -363,7 +386,7 @@ public class ExecutionHistoryView implements WidgetProvider
             view.resize(dim[0], dim[1]);
 
         resizeChartArea(view);
-        
+
         return view;
     }
 
@@ -372,5 +395,5 @@ public class ExecutionHistoryView implements WidgetProvider
         int resizeTo= Integer.valueOf(view.getHeight()) + 75;
         chartArea.setHeight(resizeTo+"px");
         chartArea.layout();
-    }    
+    }
 }
