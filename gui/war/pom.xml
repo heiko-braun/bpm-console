@@ -120,6 +120,15 @@
 
         <dependency>
             <groupId>org.jboss.bpm</groupId>
+            <artifactId>activity-monitor-model</artifactId>
+            <scope>provided</scope>
+            <version>1.0.0-SNAPSHOT</version>
+            <classifier>sources</classifier>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.jboss.bpm</groupId>
             <artifactId>gwt-console-rpc</artifactId>
             <classifier>sources</classifier>
             <version>${version}</version>
@@ -308,6 +317,7 @@
                 <executions>
                     <execution>
                         <goals>
+                            <goal>clean</goal>
                             <goal>compile</goal>
                         </goals>
                     </execution>

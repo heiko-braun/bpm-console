@@ -17,6 +17,7 @@ package org.jboss.bpm.console.client.monitor;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Button;
@@ -28,18 +29,16 @@ import org.gwt.mosaic.ui.client.util.ResizableWidget;
 import org.gwt.mosaic.ui.client.util.ResizableWidgetCollection;
 import org.jboss.bpm.console.client.common.LoadingOverlay;
 import org.jboss.bpm.console.client.util.ConsoleLog;
+import org.jboss.bpm.console.client.util.SimpleDateFormat;
 import org.jboss.bpm.monitor.gui.client.*;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
-import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
-import org.jboss.errai.workspaces.client.protocols.LayoutParts;
 import org.timepedia.chronoscope.client.Dataset;
 import org.timepedia.chronoscope.client.Datasets;
 import org.timepedia.chronoscope.client.Overlay;
@@ -50,10 +49,12 @@ import org.timepedia.chronoscope.client.browser.json.GwtJsonDataset;
 import org.timepedia.chronoscope.client.canvas.View;
 import org.timepedia.chronoscope.client.canvas.ViewReadyCallback;
 import org.timepedia.chronoscope.client.data.tuple.Tuple2D;
+import org.timepedia.chronoscope.client.event.PlotFocusEvent;
+import org.timepedia.chronoscope.client.event.PlotFocusHandler;
+import org.timepedia.chronoscope.client.util.date.ChronoDate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.DateFormat;
+import java.util.*;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
@@ -76,7 +77,12 @@ public class ExecutionHistoryView implements WidgetProvider
     private LayoutPanel timespanPanel;
     private Map<Long, Overlay> overlayMapping = new HashMap<Long, Overlay>();
 
+    private SimpleDateFormat dateFormat = new SimpleDateFormat();
+
     private String currentProcDef;
+    private TimespanValues currentTimespan;
+
+    HTML debugPanel = new HTML();
 
     public void provideWidget(ProvisioningCallback callback)
     {
@@ -88,25 +94,14 @@ public class ExecutionHistoryView implements WidgetProvider
 
         // -----
         
-        menuButton = new ToolButton("Open");
-        menuButton.setStyle(ToolButton.ToolButtonStyle.MENU);
-        final Command selectProcessCmd = new Command() {
-            public void execute()
-            {
-                // update if necessary
+        menuButton = new ToolButton("Open", new ClickHandler()
+        {
+            public void onClick(ClickEvent clickEvent) {
                 selectDefinition();
             }
-        };
-
-        PopupMenu menuBtnMenu = new PopupMenu();
-        menuBtnMenu.addItem("ProcessDefintion", selectProcessCmd);
-        menuButton.setMenu(menuBtnMenu);
+        });
         toolBar.add(menuButton);
-
-        // -----
-
-        toolBar.addSeparator();
-
+        
 
         // -----
 
@@ -129,12 +124,13 @@ public class ExecutionHistoryView implements WidgetProvider
 
         final PopupMenu timeBtnMenu = new PopupMenu();
 
-        for(final String ts : TimespanValues.ALL)
+        for(final TimespanValues ts : TimespanValues.values())
         {
-            timeBtnMenu.addItem(ts, new Command()
+            timeBtnMenu.addItem(ts.getCanonicalName(), new Command()
             {
                 public void execute()
                 {
+                    currentTimespan = ts;
                     loadGraphData(currentProcDef, ts);
                 }
             });
@@ -150,13 +146,15 @@ public class ExecutionHistoryView implements WidgetProvider
         final LayoutPanel contents = new LayoutPanel(new RowLayout());
 
         LayoutPanel headerPanel = new LayoutPanel(new ColumnLayout());
-        headerPanel.add(title, new ColumnLayoutData("60%"));
-        headerPanel.add(timespanPanel, new ColumnLayoutData("40%"));
+        headerPanel.add(title, new ColumnLayoutData("55%"));
+        headerPanel.add(timespanPanel, new ColumnLayoutData("45%"));
 
         // ------------
 
         chartArea = new CaptionLayoutPanel();
         chartArea.setPadding(15);
+        chartArea.setLayout(new BoxLayout(BoxLayout.Orientation.VERTICAL));
+        
         contents.add(headerPanel, new RowLayoutData("120"));
         contents.add(chartArea, new RowLayoutData(true));
 
@@ -265,16 +263,23 @@ public class ExecutionHistoryView implements WidgetProvider
      * @param procDefID
      * @param timespan
      */
-    private void loadGraphData(final String procDefID, final String timespan)
+    private void loadGraphData(final String procDefID, final TimespanValues timespan)
     {
         ChartData rpcService = MessageBuilder.createCall(
                 new RemoteCallback<String>()
                 {
-                    public void callback(String response)
+                    public void callback(String jsonData)
                     {
                         LoadingOverlay.on(chartArea, false);
                         timespanButton.setVisible(true);
-                        renderChart(response);
+
+                        // feed chronoscope ...
+                        final Datasets<Tuple2D> datasets = new Datasets<Tuple2D>();
+                        datasets.add(MonitorUI.chronoscope.getDatasetReader().createDatasetFromJson(
+                                new GwtJsonDataset(JSOModel.fromJson(jsonData)))
+                        );
+
+                        renderChart(datasets);
                         timespanPanel.layout();
                     }
                 },
@@ -282,18 +287,13 @@ public class ExecutionHistoryView implements WidgetProvider
         );
 
         LoadingOverlay.on(chartArea, true);
-        rpcService.getDefinitionActivity(procDefID, timespan);
+        rpcService.getCompletedInstances(procDefID, timespan.getCanonicalName());
     }
 
-    private void renderChart(String jsonData)
+    private void renderChart(Datasets<Tuple2D> datasets)
     {
         try
         {
-            final Datasets<Tuple2D> datasets = new Datasets<Tuple2D>();
-            datasets.add(MonitorUI.chronoscope.getDatasetReader().createDatasetFromJson(
-                    new GwtJsonDataset(JSOModel.fromJson(jsonData)))
-            );
-
             Dataset[] dsArray = datasets.toArray();
 
             // if exists remove. I don't know how to update at this point
@@ -327,18 +327,29 @@ public class ExecutionHistoryView implements WidgetProvider
         // marker
         final XYPlot plot = chartPanel.getChart().getPlot();
 
-        /*plot.addPlotFocusHandler(new PlotFocusHandler(){
+        plot.addPlotFocusHandler(new PlotFocusHandler(){
             public void onFocus(final PlotFocusEvent event)
             {
-
                 if(event.getFocusDataset()>=0) // zooming
                 {
-                    ChartComment comment = new ChartComment();
-                    comment.setDomainValue(event.getDomain());                   
+                    ChronoDate chronoDate = ChronoDate.get(event.getDomain());
+                    Date date = new Date();
+                    date.setTime((long) chronoDate.getTime());
+                    
+                    StringBuffer sb = new StringBuffer();
+                    sb.append("Range: " +event.getRange()).append("<br/>");
+                    sb.append("Date: " +date.toString()).append("<br/>");
+                    sb.append("TimeZone: ").append(DateTimeFormat.getFormat("Z").format(new Date())).append("<br/>");
+                    sb.append("DateF: " +DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss z").format(date)).append("<br/>");
+                    sb.append("ChronoDate: ").append(chronoDate.getTime()).append("<br/>");
+
+                    debugPanel.setHTML(sb.toString());
+                    
+                    loadInstances(date);
                 }
             }
-        });*/
-
+        });
+        
         // ------        
 
         final ViewReadyCallback callback = new ViewReadyCallback() {
@@ -349,6 +360,7 @@ public class ExecutionHistoryView implements WidgetProvider
         chartPanel.setViewReadyCallback(callback);
 
         chartArea.add(chartPanel);
+        chartArea.add(debugPanel);
 
         // ------
 
@@ -366,6 +378,24 @@ public class ExecutionHistoryView implements WidgetProvider
                 View view = resizeChartView();
             }
         });
+    }
+
+    private void loadInstances(Date date)
+    {
+        ConsoleLog.debug("Loading instances for " +dateFormat.format(date));
+
+        HistoryRecords call = MessageBuilder.createCall(
+                new RemoteCallback<Set<String>>()
+                {
+                    public void callback(Set<String> response) {
+                        for(String instanceId : response)
+                            ConsoleLog.info("-> "+ instanceId);
+                    }
+                }, HistoryRecords.class
+        );
+
+        
+        call.getCompletedInstances(currentProcDef, date.getTime(), currentTimespan.getCanonicalName());
     }
 
     private int[] calcChartDimension()
@@ -392,8 +422,8 @@ public class ExecutionHistoryView implements WidgetProvider
 
     private void resizeChartArea(View view)
     {
-        int resizeTo= Integer.valueOf(view.getHeight()) + 75;
+        /*int resizeTo= Integer.valueOf(view.getHeight()) + 75;
         chartArea.setHeight(resizeTo+"px");
-        chartArea.layout();
+        chartArea.layout();*/
     }
 }
