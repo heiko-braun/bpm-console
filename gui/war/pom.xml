@@ -292,7 +292,7 @@
         </dependency>
 
     </dependencies>
-
+    
     <!-- Plugins -->
     <build>
         <finalName>gwt-console</finalName>
@@ -756,6 +756,8 @@
             </build>
         </profile>
 
+               
     </profiles>
+
 
 </project>

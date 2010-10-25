@@ -17,14 +17,20 @@ package org.jboss.bpm.console.client.monitor;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.ListBox;
-import org.gwt.mosaic.ui.client.*;
+import com.google.gwt.user.client.ui.Label;
+import org.gwt.mosaic.ui.client.LayoutPopupPanel;
+import org.gwt.mosaic.ui.client.PopupMenu;
+import org.gwt.mosaic.ui.client.ToolBar;
+import org.gwt.mosaic.ui.client.ToolButton;
 import org.gwt.mosaic.ui.client.layout.*;
+import org.gwt.mosaic.ui.client.list.DefaultListModel;
 import org.gwt.mosaic.ui.client.util.ResizableWidget;
 import org.gwt.mosaic.ui.client.util.ResizableWidgetCollection;
 import org.jboss.bpm.console.client.common.LoadingOverlay;
@@ -51,15 +57,15 @@ import org.timepedia.chronoscope.client.canvas.ViewReadyCallback;
 import org.timepedia.chronoscope.client.data.tuple.Tuple2D;
 import org.timepedia.chronoscope.client.event.PlotFocusEvent;
 import org.timepedia.chronoscope.client.event.PlotFocusHandler;
+import org.timepedia.chronoscope.client.io.DatasetReader;
 import org.timepedia.chronoscope.client.util.date.ChronoDate;
 
-import java.text.DateFormat;
 import java.util.*;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Mar 11, 2010
- */
+ */                                                                                                          
 @LoadTool(name="Execution History", group = "Processes")
 public class ExecutionHistoryView implements WidgetProvider
 {
@@ -73,7 +79,7 @@ public class ExecutionHistoryView implements WidgetProvider
     private ToolButton timespanButton;
     private HTML title;
     private HTML timespan;
-    private CaptionLayoutPanel chartArea;
+    private LayoutPanel chartArea;
     private LayoutPanel timespanPanel;
     private Map<Long, Overlay> overlayMapping = new HashMap<Long, Overlay>();
 
@@ -82,7 +88,10 @@ public class ExecutionHistoryView implements WidgetProvider
     private String currentProcDef;
     private TimespanValues currentTimespan;
 
-    HTML debugPanel = new HTML();
+    private LayoutPanel instancePanel;
+    private org.gwt.mosaic.ui.client.ListBox<String> listBox;
+    private LayoutPanel buttonPanel;
+    private CheckBox includeFailed;
 
     public void provideWidget(ProvisioningCallback callback)
     {
@@ -93,7 +102,7 @@ public class ExecutionHistoryView implements WidgetProvider
         panel.add(toolBar, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
 
         // -----
-        
+
         menuButton = new ToolButton("Open", new ClickHandler()
         {
             public void onClick(ClickEvent clickEvent) {
@@ -101,7 +110,7 @@ public class ExecutionHistoryView implements WidgetProvider
             }
         });
         toolBar.add(menuButton);
-        
+
 
         // -----
 
@@ -130,8 +139,7 @@ public class ExecutionHistoryView implements WidgetProvider
             {
                 public void execute()
                 {
-                    currentTimespan = ts;
-                    loadGraphData(currentProcDef, ts);
+                    loadDatasets(currentProcDef, ts);
                 }
             });
         };
@@ -151,20 +159,37 @@ public class ExecutionHistoryView implements WidgetProvider
 
         // ------------
 
-        chartArea = new CaptionLayoutPanel();
+        chartArea = new LayoutPanel();
         chartArea.setPadding(15);
-        chartArea.setLayout(new BoxLayout(BoxLayout.Orientation.VERTICAL));
-        
+        chartArea.setLayout(new BorderLayout());
+
+        instancePanel = new LayoutPanel();
+        listBox = new org.gwt.mosaic.ui.client.ListBox(new String[]{"Process Instance"});
+        instancePanel.add(listBox);
         contents.add(headerPanel, new RowLayoutData("120"));
         contents.add(chartArea, new RowLayoutData(true));
 
+        // ------------
+
+        includeFailed = new CheckBox("Incl. failed / terminated?");
+        includeFailed.setValue(false);
+        includeFailed.addValueChangeHandler(new ValueChangeHandler<Boolean>()
+        {
+            public void onValueChange(ValueChangeEvent<Boolean> isEnabled) {                
+                loadDatasets(currentProcDef, currentTimespan);
+            }
+        });
+
+        buttonPanel = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.VERTICAL));
+        buttonPanel.add(includeFailed);
+        
         // ------------
         panel.add(contents, new BoxLayoutData(BoxLayoutData.FillStyle.BOTH));
 
         ErraiBus.get().subscribe("process.execution.history", new MessageCallback()
         {
             public void callback(Message message) {
-                
+
                 String processName = message.get(String.class, "processName");
                 update(processName);
 
@@ -186,7 +211,8 @@ public class ExecutionHistoryView implements WidgetProvider
                         final LayoutPopupPanel popup = new LayoutPopupPanel(true);
                         popup.addStyleName("soa-PopupPanel");
 
-                        final ListBox listBox = new ListBox();
+                        final com.google.gwt.user.client.ui.ListBox listBox =
+                                new com.google.gwt.user.client.ui.ListBox();
                         listBox.addItem("");
 
                         for(String s : response)
@@ -196,7 +222,7 @@ public class ExecutionHistoryView implements WidgetProvider
 
                         // show dialogue
                         LayoutPanel p = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.VERTICAL));
-                        p.add(new HTML("Which definition would like to inspect?"));
+                        p.add(new HTML("Please select a process"));
                         p.add(listBox);
 
                         // -----
@@ -255,7 +281,7 @@ public class ExecutionHistoryView implements WidgetProvider
         }
 
         title.setHTML(name + "<br/><div style='color:#C8C8C8;font-size:12px;text-align:left;'>"+subtitle+"</div>");
-        loadGraphData(currentProcDef, TimespanValues.LAST_7_DAYS);
+        loadDatasets(currentProcDef, TimespanValues.LAST_7_DAYS);
     }
 
     /**
@@ -263,8 +289,13 @@ public class ExecutionHistoryView implements WidgetProvider
      * @param procDefID
      * @param timespan
      */
-    private void loadGraphData(final String procDefID, final TimespanValues timespan)
+    private void loadDatasets(final String procDefID, final TimespanValues timespan)
     {
+
+        currentTimespan = timespan;
+        ((DefaultListModel)listBox.getModel()).clear();
+
+
         ChartData rpcService = MessageBuilder.createCall(
                 new RemoteCallback<String>()
                 {
@@ -275,9 +306,25 @@ public class ExecutionHistoryView implements WidgetProvider
 
                         // feed chronoscope ...
                         final Datasets<Tuple2D> datasets = new Datasets<Tuple2D>();
-                        datasets.add(MonitorUI.chronoscope.getDatasetReader().createDatasetFromJson(
-                                new GwtJsonDataset(JSOModel.fromJson(jsonData)))
-                        );
+                        DatasetReader datasetReader = MonitorUI.chronoscope.getDatasetReader();
+                        JSOModel jsoModel = JSOModel.fromJson(jsonData);
+
+                        if(jsonData.startsWith("["))
+                        {
+                            for(int i=0; i<jsoModel.length(); i++)
+                            {
+                                datasets.add(datasetReader.createDatasetFromJson(
+                                        new GwtJsonDataset(jsoModel.get(i)))
+                                );
+                            }
+                        }
+                        else
+                        {
+                            datasets.add(datasetReader.createDatasetFromJson(
+                                    new GwtJsonDataset(jsoModel))
+                            );
+                        }
+
 
                         renderChart(datasets);
                         timespanPanel.layout();
@@ -287,7 +334,11 @@ public class ExecutionHistoryView implements WidgetProvider
         );
 
         LoadingOverlay.on(chartArea, true);
-        rpcService.getCompletedInstances(procDefID, timespan.getCanonicalName());
+
+        if(includeFailed.getValue())
+            rpcService.getFailedInstances(procDefID, timespan.getCanonicalName());
+        else
+            rpcService.getCompletedInstances(procDefID, timespan.getCanonicalName());
     }
 
     private void renderChart(Datasets<Tuple2D> datasets)
@@ -308,7 +359,7 @@ public class ExecutionHistoryView implements WidgetProvider
                 initChartPanel(dsArray);
             }
 
-            timespan.setText(dsArray[0].getRangeLabel());
+            timespan.setText("Executions " +currentTimespan.getCanonicalName());
             chartArea.layout();
         }
         catch (Exception e)
@@ -335,21 +386,21 @@ public class ExecutionHistoryView implements WidgetProvider
                     ChronoDate chronoDate = ChronoDate.get(event.getDomain());
                     Date date = new Date();
                     date.setTime((long) chronoDate.getTime());
-                    
-                    StringBuffer sb = new StringBuffer();
+
+                    /*StringBuffer sb = new StringBuffer();
                     sb.append("Range: " +event.getRange()).append("<br/>");
                     sb.append("Date: " +date.toString()).append("<br/>");
                     sb.append("TimeZone: ").append(DateTimeFormat.getFormat("Z").format(new Date())).append("<br/>");
                     sb.append("DateF: " +DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss z").format(date)).append("<br/>");
                     sb.append("ChronoDate: ").append(chronoDate.getTime()).append("<br/>");
 
-                    debugPanel.setHTML(sb.toString());
-                    
+                    ConsoleLog.debug(sb.toString());*/
+
                     loadInstances(date);
                 }
             }
         });
-        
+
         // ------        
 
         final ViewReadyCallback callback = new ViewReadyCallback() {
@@ -357,10 +408,19 @@ public class ExecutionHistoryView implements WidgetProvider
                 resizeChartArea(view);
             }
         };
+
         chartPanel.setViewReadyCallback(callback);
 
+        final LayoutPanel wrapper = new LayoutPanel();
+        wrapper.setLayout(new ColumnLayout());
+        wrapper.add(chartPanel, new ColumnLayoutData("70%"));
+        wrapper.add(new Label("More..."), new ColumnLayoutData("30%"));
+
         chartArea.add(chartPanel);
-        chartArea.add(debugPanel);
+        chartArea.add(buttonPanel, new BorderLayoutData(BorderLayout.Region.EAST, "150px"));
+
+        instancePanel.getElement().setAttribute("style", "margin-top:15px");
+        chartArea.add(instancePanel, new BorderLayoutData(BorderLayout.Region.SOUTH, "150px"));
 
         // ------
 
@@ -388,13 +448,15 @@ public class ExecutionHistoryView implements WidgetProvider
                 new RemoteCallback<Set<String>>()
                 {
                     public void callback(Set<String> response) {
+                        DefaultListModel<String> listModel = (DefaultListModel)listBox.getModel();
+                        listModel.clear();
                         for(String instanceId : response)
-                            ConsoleLog.info("-> "+ instanceId);
+                            listModel.add(instanceId);
                     }
                 }, HistoryRecords.class
         );
 
-        
+
         call.getCompletedInstances(currentProcDef, date.getTime(), currentTimespan.getCanonicalName());
     }
 
@@ -425,5 +487,6 @@ public class ExecutionHistoryView implements WidgetProvider
         /*int resizeTo= Integer.valueOf(view.getHeight()) + 75;
         chartArea.setHeight(resizeTo+"px");
         chartArea.layout();*/
+        chartArea.layout();
     }
 }
