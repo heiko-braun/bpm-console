@@ -85,29 +85,25 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
 
         // -----------------------
 
-        definitionPanel = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.VERTICAL));        
-        
+        definitionPanel = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.VERTICAL));
+        definitionPanel.setPadding(0);
+
         final ToolBar toolBar = new ToolBar();
         definitionPanel.add(toolBar, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
 
         // -----------------------
 
-        menuButton = new ToolButton("Open");
-        menuButton.setStyle(ToolButton.ToolButtonStyle.MENU);
-        final Command selectProcessCmd = new Command() {
-            public void execute()
-            {
+        menuButton = new ToolButton("Open", new ClickHandler()
+        {
+            public void onClick(ClickEvent clickEvent) {
                 controller.handleEvent(
                         new Event(UpdateDefinitionsAction.ID, null)
                 );
             }
-        };         
+        });
 
         // -----------------------
 
-        PopupMenu menuBtnMenu = new PopupMenu();
-        menuBtnMenu.addItem("ProcessDefintion", selectProcessCmd);
-        menuButton.setMenu(menuBtnMenu);
         toolBar.add(menuButton);
 
         title = new HTML();
@@ -131,37 +127,53 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
         // -----------------------
 
         PopupMenu actionMenu = new PopupMenu();
-        actionMenu.addItem("Process Diagram", blank);
+        /*actionMenu.addItem("Process Diagram", new Command()
+        {
+            public void execute() {
+                DeferredCommand.addCommand(new Command()
+                {
+                    public void execute() {
+                        controller.handleEvent(
+                                new Event(LoadActivityDiagramAction.ID, "instance id")
+                        );
+                    }
+                }
+                );
+            }
+        });*/
+
         actionMenu.addItem("Execution History", new Command()
         {
             public void execute() {
 
-                // open the tool
-                MessageBuilder.createMessage()
-                        .toSubject(Workspace.SUBJECT)
-                        .command(LayoutCommands.ActivateTool)
-                        .with(LayoutParts.TOOL, "Execution_History.1")
-                        .with(LayoutParts.TOOLSET, "ToolSet_Processes")
-                        .noErrorHandling()
-                        .sendNowWith(ErraiBus.get());
+                if(getActiveDefinition()!=null)
+                {
+                    // open the tool
+                    MessageBuilder.createMessage()
+                            .toSubject(Workspace.SUBJECT)
+                            .command(LayoutCommands.ActivateTool)
+                            .with(LayoutParts.TOOL, "Execution_History.1")
+                            .with(LayoutParts.TOOLSET, "ToolSet_Processes")
+                            .noErrorHandling()
+                            .sendNowWith(ErraiBus.get());
 
-                // load process data
-                ProcessDefinitionRef ref = getActiveDefinition();
-                MessageBuilder.createMessage()
-                        .toSubject("process.execution.history")
-                        .signalling()
-                        .with("processName", ref.getName()+"-"+ref.getVersion()) // hacky
-                        .noErrorHandling().sendNowWith(ErraiBus.get());
-
+                    // load process data
+                    ProcessDefinitionRef ref = getActiveDefinition();
+                    MessageBuilder.createMessage()
+                            .toSubject("process.execution.history")
+                            .signalling()
+                            .with("processName", ref.getName()+"-"+ref.getVersion()) // hacky
+                            .noErrorHandling().sendNowWith(ErraiBus.get());
+                }
             }
         });
         actions.setMenu(actionMenu);
 
         actions.getElement().setAttribute("style", "widht:30px; height:12px; padding-right:0px;background-image:none;");
-        
+
         actionPanel.add(actions, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
         headerPanel.add(actionPanel, new ColumnLayoutData("30%"));
-        
+
         definitionPanel.add(headerPanel, new BoxLayoutData(BoxLayoutData.FillStyle.BOTH));
 
         // -----------------------
@@ -177,7 +189,7 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
             public void onUnavailable() {
             }
         });
-       
+
         layout.add(definitionPanel, new BorderLayoutData(BorderLayout.Region.NORTH, 150));
         layout.add(tabPanel);
 
@@ -264,7 +276,7 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
                     sb.append("</div>");
 
                     title.setHTML(nameAndSubtitle+sb.toString());
-                                        
+
                     DeferredCommand.addCommand(new Command()
                     {
                         public void execute() {

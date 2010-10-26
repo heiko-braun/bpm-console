@@ -93,11 +93,15 @@ public class ExecutionHistoryView implements WidgetProvider
     private LayoutPanel buttonPanel;
     private CheckBox includeFailed;
 
+    private final static int DATASET_COMPLETED = 0;
+    private final static int DATASET_FAILED = 1;
+    private final static int DATASET_TERMINATED = 2;
+    
     public void provideWidget(ProvisioningCallback callback)
     {
 
         LayoutPanel panel = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.VERTICAL));
-
+                
         final ToolBar toolBar = new ToolBar();
         panel.add(toolBar, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
 
@@ -108,7 +112,7 @@ public class ExecutionHistoryView implements WidgetProvider
             public void onClick(ClickEvent clickEvent) {
                 selectDefinition();
             }
-        });
+        });        
         toolBar.add(menuButton);
 
 
@@ -154,6 +158,7 @@ public class ExecutionHistoryView implements WidgetProvider
         final LayoutPanel contents = new LayoutPanel(new RowLayout());
 
         LayoutPanel headerPanel = new LayoutPanel(new ColumnLayout());
+        headerPanel.setPadding(0);
         headerPanel.add(title, new ColumnLayoutData("55%"));
         headerPanel.add(timespanPanel, new ColumnLayoutData("45%"));
 
@@ -222,7 +227,7 @@ public class ExecutionHistoryView implements WidgetProvider
 
                         // show dialogue
                         LayoutPanel p = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.VERTICAL));
-                        p.add(new HTML("Please select a process"));
+                        p.add(new HTML("Please select a process:"));
                         p.add(listBox);
 
                         // -----
@@ -281,7 +286,8 @@ public class ExecutionHistoryView implements WidgetProvider
         }
 
         title.setHTML(name + "<br/><div style='color:#C8C8C8;font-size:12px;text-align:left;'>"+subtitle+"</div>");
-        loadDatasets(currentProcDef, TimespanValues.LAST_7_DAYS);
+        TimespanValues ts = currentTimespan == null ? TimespanValues.LAST_7_DAYS : currentTimespan;
+        loadDatasets(currentProcDef, ts);
     }
 
     /**
@@ -396,7 +402,7 @@ public class ExecutionHistoryView implements WidgetProvider
 
                     ConsoleLog.debug(sb.toString());*/
 
-                    loadInstances(date);
+                    loadInstances(date, event.getFocusDataset());
                 }
             }
         });
@@ -440,7 +446,7 @@ public class ExecutionHistoryView implements WidgetProvider
         });
     }
 
-    private void loadInstances(Date date)
+    private void loadInstances(Date date, int datasetIndex)
     {
         ConsoleLog.debug("Loading instances for " +dateFormat.format(date));
 
@@ -456,13 +462,26 @@ public class ExecutionHistoryView implements WidgetProvider
                 }, HistoryRecords.class
         );
 
+        switch (datasetIndex)
+        {
+            case DATASET_COMPLETED:                
+                call.getCompletedInstances(currentProcDef, date.getTime(), currentTimespan.getCanonicalName());
+                break;
+            case DATASET_FAILED:
+                call.getFailedInstances(currentProcDef, date.getTime(), currentTimespan.getCanonicalName());
+                break;
+            case DATASET_TERMINATED:
+                call.getTerminatedInstances(currentProcDef, date.getTime(), currentTimespan.getCanonicalName());
+                break;
+            default:
+                throw new IllegalArgumentException("Unkown dataset index "+ datasetIndex);
 
-        call.getCompletedInstances(currentProcDef, date.getTime(), currentTimespan.getCanonicalName());
+        }
     }
 
     private int[] calcChartDimension()
     {
-        int w = chartArea.getOffsetWidth()/2;
+        int w = (int) (chartArea.getOffsetWidth() * 0.60);
         int h = (int) (w / GOLDEN__RATIO);
 
         return new int[] {w, h};
