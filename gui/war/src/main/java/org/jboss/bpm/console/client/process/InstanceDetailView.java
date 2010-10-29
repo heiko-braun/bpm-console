@@ -89,7 +89,7 @@ public class InstanceDetailView extends CaptionLayoutPanel implements ViewInterf
         super.setLayout(new BoxLayout(BoxLayout.Orientation.HORIZONTAL));
 
         grid = new PropertyGrid(
-                new String[] {"Process:", "Instance ID:", "Key:", "State", "Start Date:", "Activity:"}
+                new String[] {"Process:", "Instance ID:", "State", "Start Date:", "Activity:"}
         );
 
         this.add(grid, new BoxLayoutData(BoxLayoutData.FillStyle.BOTH));
@@ -208,8 +208,7 @@ public class InstanceDetailView extends CaptionLayoutPanel implements ViewInterf
 
         String[] values = new String[] {
                 def.getName(),
-                instance.getId(),
-                instance.getKey(),
+                instance.getId(),                
                 String.valueOf( instance.getState() ),
                 dateFormat.format(instance.getStartDate()),
                 currentNodeName

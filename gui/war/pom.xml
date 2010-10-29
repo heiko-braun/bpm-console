@@ -309,7 +309,7 @@
                     <logLevel>INFO</logLevel>
                     <runTarget>app.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
-                    <extraJvmArgs>-Xmx512m</extraJvmArgs>
+                    <extraJvmArgs>-Xmx1024m -XX:+UseParallelGC -server</extraJvmArgs>
                     <localWorkers>2</localWorkers>
                     <soyc>false</soyc>
                     <style>OBF</style>

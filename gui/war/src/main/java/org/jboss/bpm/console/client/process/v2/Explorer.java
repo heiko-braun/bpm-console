@@ -15,7 +15,6 @@
  */
 package org.jboss.bpm.console.client.process.v2;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
@@ -33,16 +32,12 @@ import org.jboss.bpm.console.client.common.DataDriven;
 import org.jboss.bpm.console.client.common.LoadingOverlay;
 import org.jboss.bpm.console.client.model.ProcessDefinitionRef;
 import org.jboss.bpm.console.client.process.*;
-import org.jboss.bpm.console.client.util.ConsoleLog;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.workspaces.client.Workspace;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
-import org.jboss.errai.workspaces.client.framework.Preferences;
 import org.jboss.errai.workspaces.client.framework.Registry;
 import org.jboss.errai.workspaces.client.protocols.LayoutCommands;
 import org.jboss.errai.workspaces.client.protocols.LayoutParts;
@@ -54,7 +49,7 @@ import java.util.List;
  * @date: Oct 15, 2010
  */
 
-@LoadTool(name = "Active Instances", group = "Processes", icon = "processIcon", priority = 1)
+@LoadTool(name = "Manage Instances", group = "Processes", icon = "processIcon", priority = 1)
 public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
 
     private LayoutPanel layout;
@@ -167,6 +162,13 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
                 }
             }
         });
+
+        actionMenu.addItem("Change Version", new Command()
+        {
+            public void execute() {
+                selectVersion();
+            }
+        });
         actions.setMenu(actionMenu);
 
         actions.getElement().setAttribute("style", "widht:30px; height:12px; padding-right:0px;background-image:none;");
@@ -190,7 +192,7 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
             }
         });
 
-        layout.add(definitionPanel, new BorderLayoutData(BorderLayout.Region.NORTH, 150));
+        layout.add(definitionPanel, new BorderLayoutData(BorderLayout.Region.NORTH, 130));
         layout.add(tabPanel);
 
         callback.onSuccess(layout);
@@ -224,6 +226,7 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
     {
         final LayoutPopupPanel popup = new LayoutPopupPanel(true);
         popup.addStyleName("soa-PopupPanel");
+        popup.setWidth("30%");
 
         final ListBox listBox = new ListBox();
         listBox.addItem("");
@@ -251,43 +254,19 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
                     popup.hide();
                     selectedGroup = listBox.getItemText(listBox.getSelectedIndex());
 
-                    String name = selectedGroup; // riftsaw name juggling
-                    String subtitle = "";
-                    if(selectedGroup.indexOf("}")!=-1)
-                    {
-
-                        String[] qname = selectedGroup.split("}");
-                        name = qname[1];
-                        subtitle = qname[0].substring(1, qname[0].length());
-                    }
-
-                    String nameAndSubtitle = name + "<br/><div style='color:#C8C8C8;font-size:12px;text-align:left;'>" + subtitle + "</div>";
-                    StringBuffer sb = new StringBuffer("<p/><div style='font-size:12px;text-align:left;'>Active Version: ");
-
-                    for(ProcessDefinitionRef groupMemmber : processGroups.getProcessesForGroup(selectedGroup))
+                    for(ProcessDefinitionRef groupMemmber :
+                            processGroups.getProcessesForGroup(selectedGroup))
                     {
                         if(!groupMemmber.isSuspended())
                         {
-                            activeDefinition = groupMemmber;
-                            sb.append(groupMemmber.getVersion());
+                            setActiveDefinition(groupMemmber);
                             break;
                         }
                     }
-                    sb.append("</div>");
 
-                    title.setHTML(nameAndSubtitle+sb.toString());
+                    updateTitle();
 
-                    DeferredCommand.addCommand(new Command()
-                    {
-                        public void execute() {
-                            controller.handleEvent(
-                                    new Event(
-                                            UpdateInstancesAction.ID,
-                                            getActiveDefinition()
-                                    )
-                            );
-                        }
-                    });
+                    refresh();
 
                 }
             }
@@ -311,6 +290,127 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
         popup.setWidget(p);
         popup.pack();
         popup.show();
+    }
+
+    private void refresh() {
+
+        if(getActiveDefinition()!=null)
+        {
+            DeferredCommand.addCommand(new Command()
+            {
+                public void execute() {
+                    controller.handleEvent(
+                            new Event(
+                                    UpdateInstancesAction.ID,
+                                    getActiveDefinition()
+                            )
+                    );
+                }
+            });
+        }
+    }
+
+    private void updateTitle() {
+
+        String name = selectedGroup; // riftsaw name juggling
+        String subtitle = "";
+        if(selectedGroup.indexOf("}")!=-1)
+        {
+
+            String[] qname = selectedGroup.split("}");
+            name = qname[1];
+            subtitle = qname[0].substring(1, qname[0].length());
+        }
+
+        String nameAndSubtitle = name + "<br/><div style='color:#C8C8C8;font-size:12px;text-align:left;'>" + subtitle + "</div>";
+        StringBuffer sb = new StringBuffer("<p/><div style='font-size:12px;text-align:left;'>Version: ");
+
+        String state = activeDefinition.isSuspended() ? "suspended" : "active";
+        sb.append(activeDefinition.getVersion()).append(" (").append(state).append(")");
+        sb.append("</div>");
+
+        title.setHTML(nameAndSubtitle+sb.toString());
+    }
+
+    private void selectVersion()
+    {
+        final LayoutPopupPanel popup = new LayoutPopupPanel(true);
+        popup.addStyleName("soa-PopupPanel");
+
+        final ListBox listBox = new ListBox();
+        listBox.addItem("");
+        listBox.setWidth("50%");
+
+        assert selectedGroup!=null : "no process selected";
+
+        for(ProcessDefinitionRef def : processGroups.getProcessesForGroup(selectedGroup))
+        {
+            listBox.addItem(String.valueOf(def.getVersion()));
+        }
+
+        // show dialogue
+        LayoutPanel p = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.VERTICAL));
+        p.add(new HTML("Please select a process version:"));
+        p.add(listBox);
+
+        // -----
+
+        LayoutPanel p2 = new LayoutPanel(new BoxLayout(BoxLayout.Orientation.HORIZONTAL));
+        p2.add(new Button("Done", new ClickHandler() {
+            public void onClick(ClickEvent clickEvent)
+            {
+                if(listBox.getSelectedIndex()>0)
+                {
+                    setActiveDefinition(
+                            getSelectedVersion(listBox)
+                    );
+
+                    updateTitle();
+
+                    refresh();
+
+                    popup.hide();
+                }
+            }
+        }));
+
+        // -----
+
+        HTML html = new HTML("Cancel");
+        html.addClickHandler(new ClickHandler(){
+            public void onClick(ClickEvent clickEvent)
+            {
+                popup.hide();
+            }
+        });
+
+        p2.add(html, new BoxLayoutData(BoxLayoutData.FillStyle.HORIZONTAL));
+        p.add(p2);
+
+        // -----
+
+        popup.setPopupPosition(menuButton.getAbsoluteLeft()-2, menuButton.getAbsoluteTop()+30);
+        popup.setWidget(p);
+        popup.pack();
+        popup.show();
+    }
+
+    private ProcessDefinitionRef getSelectedVersion(ListBox listBox) {
+        ProcessDefinitionRef selection = null;
+        for(ProcessDefinitionRef ref : processGroups.getProcessesForGroup(selectedGroup))
+        {
+            if(ref.getVersion() == Long.valueOf(listBox.getItemText(listBox.getSelectedIndex())))
+            {
+                selection = ref;
+                break;
+            }
+        }
+
+        return selection;
+    }
+
+    public void setActiveDefinition(ProcessDefinitionRef ref) {
+        this.activeDefinition = ref;
     }
 
     private ProcessDefinitionRef getActiveDefinition() {

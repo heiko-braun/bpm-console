@@ -312,7 +312,7 @@ public class ExecutionHistoryView implements WidgetProvider
 
                         // feed chronoscope ...
                         final Datasets<Tuple2D> datasets = new Datasets<Tuple2D>();
-                        DatasetReader datasetReader = MonitorUI.chronoscope.getDatasetReader();
+                        DatasetReader datasetReader = ChronoscopeFactory.getInstance().getDatasetReader();
                         JSOModel jsoModel = JSOModel.fromJson(jsonData);
 
                         if(jsonData.startsWith("["))
