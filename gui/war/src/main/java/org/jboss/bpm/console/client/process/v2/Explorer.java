@@ -254,14 +254,11 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
                     popup.hide();
                     selectedGroup = listBox.getItemText(listBox.getSelectedIndex());
 
-                    for(ProcessDefinitionRef groupMemmber :
-                            processGroups.getProcessesForGroup(selectedGroup))
+                    identifyActiveVersion();
+
+                    if(null==getActiveDefinition()) // none active
                     {
-                        if(!groupMemmber.isSuspended())
-                        {
-                            setActiveDefinition(groupMemmber);
-                            break;
-                        }
+                        identifyMostRecentVersion();
                     }
 
                     updateTitle();
@@ -292,6 +289,31 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
         popup.show();
     }
 
+    private void identifyActiveVersion() {
+        for(ProcessDefinitionRef groupMemmber :
+                processGroups.getProcessesForGroup(selectedGroup))
+        {
+            if(!groupMemmber.isSuspended())
+            {
+                setActiveDefinition(groupMemmber);
+                break;
+            }
+        }
+    }
+
+    private void identifyMostRecentVersion() {
+        ProcessDefinitionRef mostRecent = null;
+
+        for(ProcessDefinitionRef groupMember :
+                processGroups.getProcessesForGroup(selectedGroup))
+        {
+            if(null==mostRecent || groupMember.getVersion()>mostRecent.getVersion())
+                mostRecent = groupMember;
+        }
+
+        setActiveDefinition(mostRecent);
+    }
+
     private void refresh() {
 
         if(getActiveDefinition()!=null)
@@ -312,6 +334,8 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
 
     private void updateTitle() {
 
+        final ProcessDefinitionRef ref = getActiveDefinition();
+
         String name = selectedGroup; // riftsaw name juggling
         String subtitle = "";
         if(selectedGroup.indexOf("}")!=-1)
@@ -325,8 +349,8 @@ public class Explorer implements WidgetProvider, DataDriven, ViewInterface {
         String nameAndSubtitle = name + "<br/><div style='color:#C8C8C8;font-size:12px;text-align:left;'>" + subtitle + "</div>";
         StringBuffer sb = new StringBuffer("<p/><div style='font-size:12px;text-align:left;'>Version: ");
 
-        String state = activeDefinition.isSuspended() ? "suspended" : "active";
-        sb.append(activeDefinition.getVersion()).append(" (").append(state).append(")");
+        String state = ref.isSuspended() ? "suspended" : "active";
+        sb.append(ref.getVersion()).append(" (").append(state).append(")");
         sb.append("</div>");
 
         title.setHTML(nameAndSubtitle+sb.toString());
