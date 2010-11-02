@@ -171,7 +171,7 @@ public class ExecutionHistoryView implements WidgetProvider
         instancePanel = new LayoutPanel();
         listBox = new org.gwt.mosaic.ui.client.ListBox(new String[]{"Process Instance"});
         instancePanel.add(listBox);
-        contents.add(headerPanel, new RowLayoutData("120"));
+        contents.add(headerPanel, new RowLayoutData("100"));
         contents.add(chartArea, new RowLayoutData(true));
 
         // ------------
@@ -481,10 +481,10 @@ public class ExecutionHistoryView implements WidgetProvider
 
     private int[] calcChartDimension()
     {
-        int w = (int) (chartArea.getOffsetWidth() * 0.60);
-        int h = (int) (w / GOLDEN__RATIO);
+       // int w = (int) (chartArea.getOffsetWidth() * 0.50);
+       // int h = (int) (w / GOLDEN__RATIO);
 
-        return new int[] {w, h};
+        return new int[] {460, 200};
     }
 
     private View resizeChartView()
