@@ -4,8 +4,14 @@
     <name>JBoss BPM - Console</name>
     <groupId>org.jboss.bpm</groupId>
     <artifactId>gwt-console-parent</artifactId>
-    <version>2.2.2-SNAPSHOT</version>
+    <version>2.2.2-Final</version>
     <packaging>pom</packaging>
+
+    <description>BPM Management console used by Riftsaw, jBPM and Drools Flow</description>
+
+    <url>
+        http://github.com/heiko-braun/bpm-console
+    </url>
 
     <scm>
         <connection>scm:git:git@github.com:heiko-braun/bpm-console.git</connection>
@@ -17,6 +23,19 @@
         <name>JBoss, a division of Red Hat</name>
         <url>http://www.jboss.org</url>
     </organization>
+
+    <developers>
+        <developer>
+            <name>Heiko Braun</name>
+            <id>hbraun</id>
+            <email>hbraun@redhat.com</email>
+            <organization>Red Hat</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
 
     <!-- IssueManagement -->
     <issueManagement>
@@ -54,10 +73,12 @@
         <stax-api.version>1.0-2</stax-api.version>
         <report.server.version>1.3.0</report.server.version>
 
-        <errai.version>1.1-SNAPSHOT</errai.version>
+        <errai.version>1.1-CR2</errai.version>
         <mvel.version>2.0.18-RC4</mvel.version>
         <guice.version>2.0</guice.version>
         <slf4j.version>1.5.2</slf4j.version>
+
+        <activity.monitor.version>1.0.0-Beta2</activity.monitor.version>
     </properties>
 
     <modules>
@@ -261,14 +282,14 @@
             <dependency>
                 <groupId>org.jboss.bpm</groupId>
                 <artifactId>activity-monitor-ui-lib</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>${activity.monitor.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.jboss.bpm</groupId>
                 <artifactId>activity-monitor-ui-lib</artifactId>
                 <classifier>sources</classifier>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>${activity.monitor.version}</version>
             </dependency>
 
         </dependencies>
